@@ -1,0 +1,12 @@
+# IDE
+.idea
+
+
+.DS_Store
+.env
+.venv/
+__pycache__/
+dist/
+build/
+*.log
+EOF
