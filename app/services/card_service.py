@@ -3,8 +3,8 @@ from datetime import date, datetime
 from sqlalchemy.dialects.mysql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.external.trello.client import TrelloClient
 from app.models.card import Card
-from app.services.trello_client import TrelloClient
 
 
 def _parse_dt(value: str | None) -> datetime | None:
@@ -63,19 +63,20 @@ class CardService:
     def __init__(self, trello_client: TrelloClient) -> None:
         self._trello = trello_client
 
-    async def sync_board_cards(self, db: AsyncSession, board_id: str) -> int:
-        """Fetch all cards from a Trello board and upsert them into local DB.
+    async def fetch_board_cards(self, board_id: str) -> list[dict]:
+        """Fetch raw card data from Trello (HTTP only, no DB)."""
+        return await self._trello.get_board_cards(board_id)
 
-        Returns the number of cards synced.
+    async def upsert_cards(self, db: AsyncSession, raw_cards: list[dict]) -> int:
+        """Upsert a pre-fetched list of raw Trello cards into local DB.
+
+        Returns the number of cards upserted.
         """
-        raw_cards = await self._trello.get_board_cards(board_id)
-
         if not raw_cards:
             return 0
 
         rows = [_to_orm_dict(c) for c in raw_cards]
 
-        # MySQL upsert: INSERT ... ON DUPLICATE KEY UPDATE
         stmt = insert(Card).values(rows)
         update_cols = {col: stmt.inserted[col] for col in rows[0] if col != "id"}
         stmt = stmt.on_duplicate_key_update(**update_cols)
@@ -84,3 +85,8 @@ class CardService:
         await db.commit()
 
         return len(rows)
+
+    async def sync_board_cards(self, db: AsyncSession, board_id: str) -> int:
+        """Fetch and upsert all cards for a board (convenience method)."""
+        raw_cards = await self.fetch_board_cards(board_id)
+        return await self.upsert_cards(db, raw_cards)
