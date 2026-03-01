@@ -11,3 +11,22 @@ services:
       - "3307:3306"
     volumes:
       - ./.data/mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: masterglorious/trello-reminder:latest
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+    depends_on:
+      mysql:
+        condition: service_healthy

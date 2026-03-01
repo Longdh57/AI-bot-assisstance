@@ -7,6 +7,12 @@ from app.schemas.card import (
     CardColor,
     CoverBrightness,
 )
+from app.schemas.current_list import (
+    AddCurrentListRequest,
+    CardInCurrentList,
+    CurrentListResponse,
+    CurrentListWithCards,
+)
 from app.schemas.trello_list import TrelloList
 
 __all__ = [
@@ -18,4 +24,8 @@ __all__ = [
     "CardColor",
     "CoverBrightness",
     "TrelloList",
+    "AddCurrentListRequest",
+    "CardInCurrentList",
+    "CurrentListResponse",
+    "CurrentListWithCards",
 ]

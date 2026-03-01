@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     API_TOKEN: str
     BOARD_ID: str
 
+    # Discord
+    DISCORD_WEBHOOK: str | None = None
+
     @property
     def DATABASE_URL(self) -> str:
         return (
