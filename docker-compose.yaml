@@ -17,6 +17,19 @@ services:
       timeout: 5s
       retries: 5
 
+  alembic:
+    image: masterglorious/trello-reminder:latest
+    command: alembic upgrade head
+    env_file:
+      - .env
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: no
+
   app:
     image: masterglorious/trello-reminder:latest
     restart: unless-stopped
