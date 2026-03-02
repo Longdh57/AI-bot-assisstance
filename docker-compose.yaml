@@ -1,6 +1,7 @@
 services:
   mysql:
     image: mysql:8.0
+    container_name: trello-reminder-mysql
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
@@ -16,9 +17,12 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - trello-net
 
   alembic:
     image: masterglorious/trello-reminder:latest
+    container_name: trello-reminder-alembic
     command: alembic upgrade head
     env_file:
       - .env
@@ -29,9 +33,12 @@ services:
       mysql:
         condition: service_healthy
     restart: no
+    networks:
+      - trello-net
 
   app:
     image: masterglorious/trello-reminder:latest
+    container_name: trello-reminder-app
     restart: unless-stopped
     ports:
       - "8001:8001"
@@ -43,3 +50,9 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+    networks:
+      - trello-net
+
+networks:
+  trello-net:
+    driver: bridge
