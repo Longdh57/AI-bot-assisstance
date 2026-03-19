@@ -51,7 +51,7 @@ def _format_current_cards_message(groups: list[CurrentListWithCards]) -> str:
 @router.get(
     "",
     response_model=list[CurrentListResponse],
-    summary="Get all current lists",
+    summary="Get all today's task lists",
     description="Returns all Trello list IDs that are marked as current (today's task lists).",
 )
 async def get_current_lists(db: AsyncSession = Depends(get_db)) -> list[CurrentListResponse]:
